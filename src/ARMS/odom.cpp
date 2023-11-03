@@ -36,25 +36,11 @@ double prev_middle_pos = 0;
 double prev_heading = 0;
 
 double getLeftEncoder() {
-	if (configData.encoderType == ENCODER_ADI && leftADIEncoder != nullptr) {
-		return leftADIEncoder->get_value();
-	} else if (leftRotation != nullptr) {
-		return leftRotation->get_position();
-	} else if (chassis::leftMotors) {
-		return chassis::leftMotors->get_positions()[0];
-	}
-	return 0;
+	return chassis::leftMotors->get_positions()[0];
 }
 
 double getRightEncoder() {
-	if (configData.encoderType == ENCODER_ADI && rightADIEncoder != nullptr) {
-		return rightADIEncoder->get_value();
-	} else if (rightRotation != nullptr) {
-		return rightRotation->get_position();
-	} else if (chassis::rightMotors) {
-		return chassis::rightMotors->get_positions()[0];
-	}
-	return 0;
+	return chassis::rightMotors->get_positions()[0];
 }
 
 double getMiddleEncoder() {
