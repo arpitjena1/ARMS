@@ -82,31 +82,22 @@ void swing(float heading, bool isLeft) {
 
     arms::chassis::arcade(0, 0);
 }	
-void arc(float heading, bool isLeft, double leftcurve, double rightarc) {
+void arc(double targetAngle, double leftScaler, double rightScaler) {
     swingPID.reset();
-	if(isLeft){
-		do {
-        float error = rollAngle180(heading - arms::odom::imu->get_heading());
-        float pidOutput = swingPID.update(0, -error);
 
-        arms::chassis::tank( pidOutput ,(rightarc * 100)/pidOutput);
+    do {
+		float error = rollAngle180(targetAngle - arms::odom::imu->get_heading());
+        double stepVal = swingPID.update(0, -error);
+        
+        double left = stepVal * leftScaler;
+        double right = stepVal * rightScaler;
 
-        pros::delay(20);
+        arms::chassis::tank(left, right);
+        pros::delay(10);
     } while (!swingPID.isSettled());
-	} else{
-		do {
-        float error = rollAngle180(heading - arms::odom::imu->get_heading());
-        float pidOutput = turnPID.update(0, -error);
 
-        arms::chassis::tank((leftcurve * 100)/pidOutput, pidOutput);
-
-        pros::delay(20);
-    } while (!swingPID.isSettled());
-	}
-    
-
-    arms::chassis::arcade(0, 0);
-}	
+    arms::chassis::tank(0, 0);
+}
 void move(double dist){
 	drivePID.reset();
 	float beginningLeft = arms::chassis::leftMotors->get_positions()[0];
@@ -156,7 +147,7 @@ void mtp2(double x, double y, double theta, double speed, arms::MoveFlags moveFl
 }
 void cataTaskForSkills(){
     slapper.move(127);
-	pros:delay(26000);
+	pros:delay(5000);
     slapper.set_brake_mode(E_MOTOR_BRAKE_HOLD);
     slapper.move(0);
 }
@@ -192,22 +183,24 @@ pros::ADIDigitalOut frontwings('A');
 void rightside(){
 using namespace arms;
 intake.move(127);
-pros::delay(300);
+pros::delay(350);
 intake.move(30);
 mtp(0,-30,0, REVERSE);
 mtp(45, -110, -90, REVERSE);
-mtp(20, -60, -90, NONE);
-mtp(45, -120, -180, ASYNC);
-pros::delay(600);
+mtp(15, -60, -90, NONE);
+mtp(60, -120, -180, ASYNC);
+pros::delay(550);
 intake.move(-127);
 chassis::waitUntilFinished(1);
 odom::reset({0,0});
 mtp(-10, 0, 0, REVERSE);
 mtp(-10, 0, 45, REVERSE);
 intake.move(127);
-mtp(3, 39, 155, ASYNC);//---------------------
-pros::delay(2500);intake.move(-127);
-chassis::waitUntilFinished(1);
+mtp(-1, 41, 155, NONE);//-------7
+turn(170);
+intake.move(-127);
+pros::delay(100);
+turn(155);
 intake.move(127);
 mtp(15, 45, 55, NONE);
 pros::delay(100);
@@ -218,8 +211,9 @@ frontwings.set_value(1);
 pros::delay(100);
 intake.move(-127);
 chassis::waitUntilFinished(1);
-turn(130);
 frontwings.set_value(0);
+turn(130);
+
 mtp(0, -54, 0, REVERSE| RELATIVE);
 blocker.set_value(1);
 }
@@ -268,6 +262,10 @@ void skills(){
 	intake.move(-127);
 	swing(-45,false);
 	mtp(-24,110, -90, NONE);
+	arms::odom::reset({0,0});
+	mtp(2,-30, 0, REVERSE);
+
+	/*
 	mtp(0,-10, 0, REVERSE| RELATIVE);
 	turn(180);
 	mtp(-5,60, 180, NONE);
@@ -320,6 +318,7 @@ void skills(){
 	chassis::waitUntilFinished(1);
 	frontwings.set_value(0);
 	mtp(10, 40, -90,REVERSE);
+	
 */
 
 	
@@ -328,6 +327,7 @@ void skills(){
 void rightsideelims(){
 	using namespace arms;
 	odom::reset({0,0}, 0);
+	blocker.set_value(1);
 	frontwings.set_value(1);
 	pros::delay(1000);
 	frontwings.set_value(0);
@@ -343,22 +343,89 @@ void rightsideelims(){
 	intake.move(127);
 	mtp(0, -20, 0, REVERSE);
 	turn(-90);
-	mtp(-2, 30, 0, RELATIVE);
-	turn(150);
-	mtp(0, 53, 0, RELATIVE);
+	mtp(0, 30, 0, RELATIVE);
+	turn(-10);
+	mtp(0, -53, 0, REVERSE | RELATIVE);
+	turn(90);
+	intake.move(-127);
+	pros::delay(50);
+	mtp(5, -10, 20, REVERSE | RELATIVE);
+	mtp(-30, 60, -50, RELATIVE | ASYNC);
+	pros::delay(50);
+	intake.move(-127);
+	chassis::waitUntilFinished(1);
+	
+	
+	
+}
+void fivetrimidrush(){
+	using namespace arms;
+	odom::reset({0,0}, 0);
+	blocker.set_value(1);
+	frontwings.set_value(1);
+	pros::delay(1000);
+	frontwings.set_value(0);
+	intake.move(127);
+	mtp(-1, 75, 0, NONE);
+	pros::delay(100);
+	turn(135);
+	frontwings.set_value(1);
+	intake.move(-127);
+	mtp(38, 30, 135, NONE);
+	odom::reset({0,0},0);
+	frontwings.set_value(0);
+	intake.move(127);
+	mtp(0, -20, 0, REVERSE);
+	turn(-90);
+	mtp(0, 30, 0, RELATIVE);
+	turn(-10);
+	mtp(0, -53, 0, REVERSE | RELATIVE);
+	turn(90);
+	intake.move(-127);
+	mtp(5, -5, 0, RELATIVE | REVERSE);
+	mtp2(0, 20, -10, 100, RELATIVE | ASYNC);
+	pros::delay(50);
+	frontwings.set_value(1);
+	chassis::waitUntilFinished(5);
 	arms::odom::imu->set_heading(0);
 	turn(-90);
-	frontwings.set_value(1);
-	mtp(5, 15, 0, RELATIVE);
-	mtp(0, -15, 0, RELATIVE| REVERSE);
-	intake.move(-127);
-	mtp(-30, 30, -90, RELATIVE);
+	frontwings.set_value(0);
+	turn(0);
 	
+	mtp(0, -20, 0, REVERSE | RELATIVE);
+	intake.move(-127);
+	mtp(-30, 100, -50, RELATIVE);
+
+}
+
+void rightside6ball(){
+	using namespace arms;
+	intake.move(127);
+	pros::delay(100);
+	mtp2(0, -30, -45,90, REVERSE);
+	mtp(0,5, -135, NONE | RELATIVE);
+	
+	mtp2(5, 40, 10, 90,RELATIVE | ASYNC);
+	pros::delay(100);
+	frontwings.set_value(1);
+	chassis::waitUntilFinished(1);
+	frontwings.set_value(0);
+	mtp(5, -20, 10, REVERSE | RELATIVE);
+	turn(150);
+	mtp(45, -130, -180, ASYNC);
+	pros::delay(300);
+	intake.move(-127);
+	chassis::waitUntilFinished(1);
+	swing(0, false);
+	mtp(0, -10, 0, REVERSE | RELATIVE);
+	mtp(0, 30, 0, NONE | RELATIVE);
+	swing(0, false);
+
 
 }
 
 void autonomous() {
-	rightsideelims();
+	skills();
 	
 
 	
