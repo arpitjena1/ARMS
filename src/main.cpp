@@ -321,9 +321,12 @@ void skills(){
 	
 */
 
-	
+
 
 }
+void sixball(){
+	
+}	
 void rightsideelims(){
 	using namespace arms;
 	odom::reset({0,0}, 0);
