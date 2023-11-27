@@ -154,13 +154,19 @@ void chainedmtp(std::vector<arms::Point> poses, bool forwards, double exitErrorP
 	using namespace arms;
 	if(forwards){
 		for (arms::Point p : poses){
-		mtp3(p.x,p.y,127, arms::NONE | arms::ASYNC);
+			if(poses.back().x == p.x && poses.back().y == p.y){
+				mtp3(p.x,p.y,127, arms::NONE);
+			}
+		mtp3(p.x,p.y,127, arms::NONE | arms::ASYNC | arms::THRU);
 		chassis::waitUntilFinished(exitErrorPerPoint);
 
 	}
 	} else{
 		for (arms::Point p : poses){
-		mtp3(p.x,p.y,127, arms::REVERSE | arms::ASYNC);
+			if(poses.back().x == p.x && poses.back().y == p.y){
+				mtp3(p.x,p.y,127, arms::REVERSE);
+			}
+		mtp3(p.x,p.y,127, arms::REVERSE | arms::ASYNC | arms::THRU);
 		chassis::waitUntilFinished(exitErrorPerPoint);
 
 	}
