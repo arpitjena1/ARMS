@@ -145,11 +145,34 @@ void mtp2(double x, double y, double theta, double speed, arms::MoveFlags moveFl
     move({{y/2,-x, -theta}}, speed, moveFlags);
 
 }
+void mtp3(double x, double y, double speed, arms::MoveFlags moveFlags){
+    using namespace arms::chassis;
+    move({{y/2,-x}}, speed, moveFlags);
+
+}
+void chainedmtp(std::vector<arms::Point> poses, bool forwards, double exitErrorPerPoint){
+	using namespace arms;
+	if(forwards){
+		for (arms::Point p : poses){
+		mtp3(p.x,p.y,127, arms::NONE | arms::ASYNC);
+		chassis::waitUntilFinished(exitErrorPerPoint);
+
+	}
+	} else{
+		for (arms::Point p : poses){
+		mtp3(p.x,p.y,127, arms::REVERSE | arms::ASYNC);
+		chassis::waitUntilFinished(exitErrorPerPoint);
+
+	}
+	}
+}
 void cataTaskForSkills(){
+	using namespace arms;
     slapper.move(127);
 	pros:delay(5000);
     slapper.set_brake_mode(E_MOTOR_BRAKE_HOLD);
     slapper.move(0);
+	//chainedmtp({Point{0,1}, Point{0,2}}, 10);
 }
 void climb(){
     double start = pros::millis();

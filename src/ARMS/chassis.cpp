@@ -109,7 +109,7 @@ bool settled() {
 }
 
 void waitUntilFinished(double exit_error) {
-	pros::delay(400); // minimum movement time
+	pros::delay(300); // minimum movement time
 	switch (pid::mode) {
 	case TRANSLATIONAL:
 		while (odom::getDistanceError(pid::pointTarget) > exit_error &&
