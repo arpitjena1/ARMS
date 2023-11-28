@@ -150,6 +150,28 @@ void mtp3(double x, double y, double speed, arms::MoveFlags moveFlags){
     move({{y/2,-x}}, speed, moveFlags);
 
 }
+void chainedmtpangle(std::vector<arms::Point> poses, bool forwards, double endAngle, double exitErrorPerPoint){
+	using namespace arms;
+	if(forwards){
+		for (arms::Point p : poses){
+			if(poses.back().x == p.x && poses.back().y == p.y){
+				mtp(p.x,p.y,endAngle, arms::NONE);
+			}
+		mtp3(p.x,p.y,127, arms::NONE | arms::ASYNC | arms::THRU);
+		chassis::waitUntilFinished(exitErrorPerPoint);
+
+	}
+	} else{
+		for (arms::Point p : poses){
+			if(poses.back().x == p.x && poses.back().y == p.y){
+				mtp(p.x,p.y,endAngle, arms::REVERSE);
+			}
+		mtp3(p.x,p.y,127, arms::REVERSE | arms::ASYNC | arms::THRU);
+		chassis::waitUntilFinished(exitErrorPerPoint);
+
+	}
+	}
+}
 void chainedmtp(std::vector<arms::Point> poses, bool forwards, double exitErrorPerPoint){
 	using namespace arms;
 	if(forwards){
